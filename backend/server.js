@@ -19,7 +19,8 @@ const app = express();
 
 // Configure CORS middleware to accept frontend origin
 const corsOptions = {
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  // origin: process.env.FRONTEND_URL || 'http://localhost:5174',
+  origin: ['*'],
   credentials: true,
   optionsSuccessStatus: 200
 };
