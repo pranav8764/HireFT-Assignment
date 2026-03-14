@@ -19,10 +19,11 @@ const app = express();
 
 // Configure CORS middleware to accept frontend origin
 const corsOptions = {
-  // origin: process.env.FRONTEND_URL || 'http://localhost:5174',
-  origin: ['*'],
-  credentials: true,
-  optionsSuccessStatus: 200
+  origin: '*', // Allow all origins (use specific origin in production)
+  credentials: false, // Set to false when using origin: '*'
+  optionsSuccessStatus: 200,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 };
 app.use(cors(corsOptions));
 

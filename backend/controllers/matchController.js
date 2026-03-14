@@ -16,41 +16,9 @@ const Analysis = require('../models/Analysis');
  */
 async function analyze(req, res) {
   try {
-    // Validate request inputs
+    // Request inputs are already validated by middleware
     const { jobUrl } = req.body;
     const resumeFile = req.file;
-
-    // Check if jobUrl is present
-    if (!jobUrl || typeof jobUrl !== 'string' || !jobUrl.trim()) {
-      return res.status(400).json({
-        success: false,
-        error: {
-          message: 'Job URL is required',
-          code: 'MISSING_JOB_URL'
-        }
-      });
-    }
-
-    // Check if resumeFile exists and is PDF
-    if (!resumeFile) {
-      return res.status(400).json({
-        success: false,
-        error: {
-          message: 'Resume file is required',
-          code: 'MISSING_RESUME_FILE'
-        }
-      });
-    }
-
-    if (resumeFile.mimetype !== 'application/pdf') {
-      return res.status(400).json({
-        success: false,
-        error: {
-          message: 'Resume file must be a PDF',
-          code: 'INVALID_FILE_TYPE'
-        }
-      });
-    }
 
     console.log(`🔍 Starting analysis for job: ${jobUrl}`);
 
