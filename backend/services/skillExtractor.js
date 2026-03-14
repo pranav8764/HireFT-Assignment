@@ -33,9 +33,12 @@ function extractSkills(text) {
 
   // Check each skill in the dictionary
   for (const skill of SKILLS) {
+    // Escape special regex characters in skill name
+    const escapedSkill = skill.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    
     // Create regex pattern with word boundaries for exact matching
     // \b ensures we match whole words only (e.g., "JavaScript" but not "JavaScriptExtra")
-    const pattern = new RegExp(`\\b${skill.toLowerCase()}\\b`, 'i');
+    const pattern = new RegExp(`\\b${escapedSkill}\\b`, 'i');
     
     if (pattern.test(lowerText)) {
       foundSkills.add(skill);
