@@ -6,6 +6,7 @@
 const express = require('express');
 const multer = require('multer');
 const matchController = require('../controllers/matchController');
+const { validateAnalyzeRequest } = require('../middleware/validation');
 
 const router = express.Router();
 
@@ -62,8 +63,8 @@ const handleMulterError = (error, req, res, next) => {
   next(error);
 };
 
-// Define POST /api/analyze route with multer middleware and matchController.analyze handler
-router.post('/analyze', upload.single('resumeFile'), handleMulterError, matchController.analyze);
+// Define POST /api/analyze route with multer middleware, validation, and matchController.analyze handler
+router.post('/analyze', upload.single('resumeFile'), handleMulterError, validateAnalyzeRequest, matchController.analyze);
 
 // API info endpoint
 router.get('/', (req, res) => {
