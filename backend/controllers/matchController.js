@@ -39,7 +39,12 @@ async function analyze(req, res) {
 
     // Step 5: Calculate match
     console.log('⚖️  Calculating match...');
-    const matchResult = matchEngine.calculateMatch(jobSkills, resumeSkills);
+    const matchResult = matchEngine.calculateMatch(
+      jobSkills, 
+      resumeSkills, 
+      jobData.description, 
+      resumeText
+    );
 
     // Step 6: Generate AI suggestions
     console.log('🤖 Generating AI suggestions...');
@@ -82,7 +87,11 @@ async function analyze(req, res) {
       matchScore: matchResult.matchScore,
       matchingSkills: matchResult.matchingSkills,
       missingSkills: matchResult.missingSkills,
+      breakdown: matchResult.breakdown, // New: individual criterion scores
+      missingRequirements: matchResult.missingRequirements, // New: unmet requirements
       suggestions,
+      sections: jobData.sections, // New: structured job sections
+      platform: jobData.platform, // New: detected platform
       createdAt: savedAnalysis ? savedAnalysis.createdAt : new Date()
     };
 
