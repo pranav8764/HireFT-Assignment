@@ -73,7 +73,7 @@ app.use((error, req, res, next) => {
 async function startServer() {
   try {
     // Validate required environment variables
-    const requiredEnvVars = ['MONGODB_URI', 'OPENAI_API_KEY'];
+    const requiredEnvVars = ['MONGODB_URI', 'GOOGLE_AI_API_KEY'];
     const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
     
     if (missingVars.length > 0) {
