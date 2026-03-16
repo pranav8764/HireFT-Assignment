@@ -1,5 +1,5 @@
 .kiro/
-node_modules/
+node_modules
 
 GOOGLE_AI_MODEL_FIX.md
 PR_DESCRIPTION.md

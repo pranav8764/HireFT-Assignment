@@ -1,7 +1,19 @@
 import React from 'react';
+import EmptyState from './EmptyState';
 
-const SkillList = ({ skills, type }) => {
-  if (!skills || skills.length === 0) {
+const SkillList = ({ skills, type, alwaysShow = true }) => {
+  // Define empty state messages for each skill type
+  const emptyMessages = {
+    matching: "No matching skills found",
+    missing: "No missing skills",
+    job: "No job skills identified",
+    resume: "No resume skills found"
+  };
+
+  // Determine if we should show the component
+  const shouldShow = alwaysShow || (skills && skills.length > 0);
+  
+  if (!shouldShow) {
     return null;
   }
 
@@ -36,28 +48,44 @@ const SkillList = ({ skills, type }) => {
   const config = typeConfig[type] || typeConfig.resume;
 
   return (
-    <div className="skill-list">
+    <div className="skill-list" role="region" aria-label={config.label}>
       <div className="skill-list-header">
-        <h4 className="skill-list-title">{config.label}</h4>
-        <span className="skill-count">({skills.length})</span>
+        <h4 className="skill-list-title" id={`skill-list-title-${type}`}>{config.label}</h4>
+        <span
+          className="skill-count"
+          aria-label={`${skills && skills.length > 0 ? skills.length : 0} skills`}
+        >
+          ({skills && skills.length > 0 ? skills.length : 0})
+        </span>
       </div>
-      <p className="skill-list-description">{config.description}</p>
+      <p className="skill-list-description" id={`skill-list-desc-${type}`}>{config.description}</p>
       
-      <div className="skills-grid">
-        {skills.map((skill, index) => (
-          <div
-            key={index}
-            className="skill-badge"
-            style={{
-              color: config.color,
-              backgroundColor: config.backgroundColor,
-              borderColor: config.color
-            }}
-          >
-            {skill}
-          </div>
-        ))}
-      </div>
+      {skills && skills.length > 0 ? (
+        <ul
+          className="skills-grid"
+          aria-labelledby={`skill-list-title-${type}`}
+          aria-describedby={`skill-list-desc-${type}`}
+        >
+          {skills.map((skill, index) => (
+            <li
+              key={index}
+              className="skill-badge"
+              style={{
+                color: config.color,
+                backgroundColor: config.backgroundColor,
+                borderColor: config.color
+              }}
+            >
+              {skill}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <EmptyState 
+          message={emptyMessages[type] || emptyMessages.resume} 
+          type={type}
+        />
+      )}
     </div>
   );
 };

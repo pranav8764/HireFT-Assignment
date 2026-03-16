@@ -87,11 +87,13 @@ async function analyze(req, res) {
       matchScore: matchResult.matchScore,
       matchingSkills: matchResult.matchingSkills,
       missingSkills: matchResult.missingSkills,
-      breakdown: matchResult.breakdown, // New: individual criterion scores
-      missingRequirements: matchResult.missingRequirements, // New: unmet requirements
+      breakdown: matchResult.breakdown,
+      experienceDetails: matchResult.experienceDetails,
+      educationDetails: matchResult.educationDetails,
+      responsibilityDetails: matchResult.responsibilityDetails,
       suggestions,
-      sections: jobData.sections, // New: structured job sections
-      platform: jobData.platform, // New: detected platform
+      sections: jobData.sections,
+      platform: jobData.platform,
       createdAt: savedAnalysis ? savedAnalysis.createdAt : new Date()
     };
 
