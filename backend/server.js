@@ -73,7 +73,7 @@ app.use((error, req, res, next) => {
 async function startServer() {
   try {
     // Validate required environment variables
-    const requiredEnvVars = ['MONGODB_URI', 'GOOGLE_AI_API_KEY'];
+    const requiredEnvVars = ['MONGODB_URI', 'GROQ_API_KEY'];
     const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
     
     if (missingVars.length > 0) {
@@ -85,6 +85,15 @@ async function startServer() {
     
     // Setup connection event handlers
     setupConnectionEvents();
+
+    // Pre-warm Puppeteer browser to avoid cold-start failures on first request
+    try {
+      const { getBrowser } = require('./services/scraper/renderPage');
+      await getBrowser();
+      console.log('✅ Puppeteer browser pre-warmed');
+    } catch (err) {
+      console.warn('⚠️  Puppeteer pre-warm failed (non-fatal):', err.message);
+    }
 
     // Start server on port from environment variable (default: 3001)
     const PORT = process.env.PORT || 3001;

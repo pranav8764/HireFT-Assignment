@@ -26,3 +26,5 @@ Thumbs.db
 # Uploads
 uploads/
 temp/
+
+services/scraper/ARCHITECTURE.md

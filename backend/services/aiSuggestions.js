@@ -1,24 +1,23 @@
 /**
  * AI Suggestions Service
- * Generates personalized resume improvement recommendations using Google AI Studio (Gemini)
+ * Generates personalized resume improvement recommendations using Groq (Llama-3.3-70b-versatile)
  */
 
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const Groq = require('groq-sdk');
 
-// Initialize Google AI client with API key from environment
-let genAI = null;
-let model = null;
+// Initialize Groq client with API key from environment
+let groq = null;
 
-function initializeGemini() {
-  if (!genAI && process.env.GOOGLE_AI_API_KEY) {
-    genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY);
-    // Using gemini-2.0-flash-lite for reliable, high-quality responses with lower quota usage
-    model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-lite' });
+function initializeGroq() {
+  if (!groq && process.env.GROQ_API_KEY) {
+    groq = new Groq({
+      apiKey: process.env.GROQ_API_KEY,
+    });
   }
 }
 
 /**
- * Generates resume improvement suggestions using Google Gemini
+ * Generates resume improvement suggestions using Groq (Llama-3.3-70b-versatile)
  * @param {string} jobDescription - The job posting description
  * @param {string} resumeText - The candidate's resume text
  * @returns {Promise<string[]>} Array of actionable suggestions
@@ -31,47 +30,59 @@ async function generateSuggestions(jobDescription, resumeText) {
     }
 
     // Check if API key is configured
-    if (!process.env.GOOGLE_AI_API_KEY) {
-      console.error('❌ GOOGLE_AI_API_KEY not configured in .env file');
-      return ['AI suggestions temporarily unavailable. Please configure Google AI API key.'];
+    if (!process.env.GROQ_API_KEY) {
+      console.error('❌ GROQ_API_KEY not configured in .env file');
+      return ['AI suggestions temporarily unavailable. Please configure Groq API key.'];
     }
 
-    // Initialize Gemini if not already done
-    initializeGemini();
+    // Initialize Groq if not already done
+    initializeGroq();
 
-    // Construct prompt instructing AI to act as hiring expert
-    const prompt = `You are an expert hiring manager and career coach. Analyze the following job description and resume, then provide exactly 5 specific, actionable suggestions to improve the resume for this job.
+    // Construct refined prompt for focused, actionable suggestions
+    const prompt = `You are a senior hiring manager. Analyze this job posting and resume, then provide exactly 5 concise, actionable suggestions to improve the resume match.
 
-Job Description:
-${jobDescription.substring(0, 3000)}
+JOB POSTING:
+${jobDescription.substring(0, 2500)}
 
-Resume:
-${resumeText.substring(0, 3000)}
+CANDIDATE RESUME:
+${resumeText.substring(0, 2500)}
 
-Provide exactly 5 suggestions as a numbered list focusing on:
-- Adding missing skills or keywords
-- Highlighting relevant experience
-- Improving formatting or structure
-- Quantifying achievements
-- Tailoring content to job requirements
+INSTRUCTIONS:
+- Focus ONLY on the biggest gaps between job requirements and resume
+- Each suggestion must be specific and actionable (not generic advice)
+- Prioritize missing skills, experience gaps, and keyword optimization
+- Be direct and practical
+- 
 
-Format your response as:
-1. [First suggestion]
-2. [Second suggestion]
-3. [Third suggestion]
-4. [Fourth suggestion]
-5. [Fifth suggestion]
+FORMAT:
+1. [Specific action]
+2. [Specific action]
+3. [Specific action]
+4. [Specific action]
+5. [Specific action]`;
 
-Be specific and actionable. Each suggestion should be clear and implementable.`;
+    console.log('🤖 Calling Groq API with Llama-3.3-70b-versatile...');
 
-    console.log('🤖 Calling Google Gemini API...');
+    // Call Groq API with Llama model
+    const completion = await groq.chat.completions.create({
+      model: 'llama-3.3-70b-versatile',
+      messages: [
+        {
+          role: 'system',
+          content: 'You are a resume optimization expert. Provide ultra-concise, specific suggestions (under 20 words each) that directly address job-resume gaps. Focus on exact skills/keywords to add.'
+        },
+        {
+          role: 'user',
+          content: prompt
+        }
+      ],
+      max_tokens: 500,
+      temperature: 0.3,
+    });
 
-    // Call Google Gemini API
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const responseText = response.text();
+    console.log('✅ Groq API response received');
 
-    console.log('✅ Gemini API response received');
+    const responseText = completion.choices[0]?.message?.content || '';
 
     // Parse response text into array of suggestions
     const suggestions = parseResponseToArray(responseText);
@@ -86,15 +97,20 @@ Be specific and actionable. Each suggestion should be clear and implementable.`;
   } catch (error) {
     console.error('❌ AI Suggestions Error:', error.message);
 
-    // Handle specific Google AI errors
-    if (error.message.includes('API_KEY_INVALID') || error.message.includes('401')) {
-      console.error('❌ Invalid Google AI API key');
-      return ['AI suggestions unavailable: Invalid API key. Please check your Google AI Studio API key.'];
+    // Handle specific Groq errors
+    if (error.message.includes('API key') || error.message.includes('401')) {
+      console.error('❌ Invalid Groq API key');
+      return ['AI suggestions unavailable: Invalid API key. Please check your Groq API key.'];
     }
 
     if (error.message.includes('quota') || error.message.includes('429')) {
-      console.error('❌ Google AI API quota exceeded');
+      console.error('❌ Groq API quota exceeded');
       return getFallbackSuggestions(jobDescription, resumeText);
+    }
+
+    if (error.message.includes('model') || error.message.includes('404')) {
+      console.error('❌ Model not available');
+      return ['AI suggestions unavailable: Llama-3.3-70b-versatile model not available. Please check your Groq subscription.'];
     }
 
     // Implement fallback message for API failures

@@ -101,21 +101,27 @@ function calculateMatch(jobSkills, resumeSkills, jobDescription, resumeText) {
     totalJobSkills: jobSkills.length,
     totalResumeSkills: resumeSkills.length,
     
-    // New: score breakdown by criterion
+    // Score breakdown by criterion
     breakdown: finalResult.breakdown,
     
-    // New: missing requirements details
-    missingRequirements: {
-      experience: {
-        required: experienceResult.requiredYears,
-        candidate: experienceResult.candidateYears,
-        met: experienceResult.meetsRequirement
-      },
-      education: {
-        required: educationResult.requiredLevel,
-        candidate: educationResult.candidateLevel,
-        met: educationResult.meetsRequirement
-      }
+    // Detailed factor information for frontend display
+    experienceDetails: {
+      score: experienceResult.score,
+      requiredYears: experienceResult.requiredYears,
+      candidateYears: experienceResult.candidateYears,
+      meetsRequirement: experienceResult.meetsRequirement
+    },
+    educationDetails: {
+      score: educationResult.score,
+      requiredDegree: educationResult.requiredLevel,
+      candidateDegree: educationResult.candidateLevel,
+      meetsRequirement: educationResult.meetsRequirement
+    },
+    responsibilityDetails: {
+      score: responsibilityResult.score,
+      matchingResponsibilities: responsibilityResult.matchingKeywords,
+      missingResponsibilities: responsibilityResult.missingKeywords,
+      totalJobKeywords: responsibilityResult.totalJobKeywords
     }
   };
 }
