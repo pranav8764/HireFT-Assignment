@@ -1,23 +1,32 @@
 # Job Match Analyzer
 
-A full-stack web application that compares job descriptions with candidate resumes to provide match analysis, skill gap identification, and AI-powered resume improvement suggestions.
+A full-stack web application that compares job descriptions with candidate resumes to provide comprehensive match analysis, skill gap identification, and AI-powered resume improvement suggestions.
 
 ## Features
 
-- **Job Analysis**: Scrape job postings from URLs to extract requirements and skills
-- **Resume Parsing**: Extract text and skills from PDF resume files
-- **Skill Matching**: Compare job requirements with resume skills using intelligent matching
-- **Match Scoring**: Calculate compatibility percentage between job and resume
-- **AI Suggestions**: Get personalized resume improvement recommendations using OpenAI GPT-4
+- **Advanced Job Scraping**: Intelligent web scraping with platform-specific parsers (Greenhouse, Lever, Ashby) and generic fallback
+- **Resume Parsing**: Extract text and skills from PDF resume files with comprehensive skill detection
+- **Multi-Factor Matching Engine**: Sophisticated matching across multiple dimensions:
+  - Skills matching with fuzzy logic and synonym detection
+  - Experience level matching (years and seniority)
+  - Education requirements matching
+  - Responsibility alignment analysis
+  - Weighted final score calculation
+- **Match Scoring**: Calculate detailed compatibility percentage with factor breakdowns
+- **AI Suggestions**: Get personalized resume improvement recommendations using Groq (Llama 3.3 70B)
 - **Analysis History**: Store and track analysis results in MongoDB
+- **Error Handling**: Comprehensive error boundaries and graceful degradation
+- **Property-Based Testing**: Robust test coverage with fast-check for correctness validation
 
 ## Architecture
 
-- **Frontend**: React 18 + Vite development server
-- **Backend**: Node.js + Express REST API
+- **Frontend**: React 18 + Vite with comprehensive error handling and loading states
+- **Backend**: Node.js + Express REST API with modular service architecture
 - **Database**: MongoDB for analysis history storage
-- **AI Service**: OpenAI API for resume improvement suggestions
-- **File Processing**: PDF parsing and web scraping capabilities
+- **AI Service**: Groq API with Llama 3.3 70B Versatile model for resume improvement suggestions
+- **Scraping Engine**: Puppeteer-based scraper with platform detection and content scoring
+- **Matching Engine**: Multi-factor matching system with weighted scoring
+- **Testing**: Vitest + Jest with property-based testing using fast-check
 
 ## Prerequisites
 
@@ -26,7 +35,7 @@ Before running this application, ensure you have:
 - **Node.js** (version 16 or higher)
 - **npm** (comes with Node.js)
 - **MongoDB Atlas account** (for cloud database) or local MongoDB installation
-- **OpenAI API key** (for AI-powered suggestions)
+- **Groq API key** (for AI-powered suggestions)
 
 ### Getting API Keys
 
@@ -35,10 +44,11 @@ Before running this application, ensure you have:
    - Create a new cluster
    - Get your connection string from the "Connect" button
 
-2. **OpenAI API Key**:
-   - Sign up at [OpenAI Platform](https://platform.openai.com/)
-   - Navigate to [API Keys](https://platform.openai.com/api-keys)
-   - Create a new API key
+2. **Groq API Key**:
+   - Visit [Groq Console](https://console.groq.com/keys)
+   - Sign in or create an account
+   - Click "Create API Key" and copy the generated key
+   - Free tier: Fast inference with generous rate limits
 
 ## Installation & Setup
 
@@ -64,7 +74,7 @@ cp .env.example .env
 # Edit .env file with your configuration
 # Required variables:
 # - MONGODB_URI: Your MongoDB connection string
-# - OPENAI_API_KEY: Your OpenAI API key
+# - GROQ_API_KEY: Your Groq API key
 # - PORT: Server port (default: 9000)
 # - FRONTEND_URL: Frontend URL for CORS (default: http://localhost:5173)
 ```
@@ -74,8 +84,8 @@ cp .env.example .env
 # MongoDB connection string
 MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/job-match-analyzer
 
-# OpenAI API key for AI suggestions
-OPENAI_API_KEY=sk-your-openai-api-key-here
+# Groq API key for AI suggestions
+GROQ_API_KEY=gsk_your-groq-api-key-here
 
 # Server port (default: 9000)
 PORT=9000
@@ -161,12 +171,19 @@ Performs complete job-resume analysis.
     "company": "Tech Company",
     "jobSkills": ["JavaScript", "React", "Node.js"],
     "resumeSkills": ["JavaScript", "Python", "React"],
-    "matchScore": 66.67,
+    "matchScore": 75.5,
+    "factorScores": {
+      "skills": 66.67,
+      "experience": 85.0,
+      "education": 100.0,
+      "responsibilities": 70.0
+    },
     "matchingSkills": ["JavaScript", "React"],
     "missingSkills": ["Node.js"],
     "suggestions": [
-      "Add Node.js experience to your resume",
-      "Highlight JavaScript projects more prominently"
+      "Add Node.js experience to your resume with specific projects",
+      "Highlight JavaScript projects more prominently",
+      "Quantify your React development achievements"
     ],
     "createdAt": "2024-01-15T10:30:00.000Z"
   }
@@ -199,33 +216,66 @@ Health check endpoint to verify API status.
 
 ## Supported Job Sites
 
-The application can scrape job postings from most websites that have standard HTML structure, including:
+The application features an intelligent scraping engine with:
+- **Platform-Specific Parsers**: Optimized extraction for Greenhouse, Lever, and Ashby ATS platforms
+- **Generic Parser**: Fallback parser with content scoring for any job site
+- **Puppeteer Rendering**: JavaScript-heavy page support
+- **Content Validation**: Quality scoring to ensure accurate extraction
+
+Successfully tested with:
 - LinkedIn Jobs
 - Indeed
 - Glassdoor
-- Company career pages
-- Job boards with standard HTML formatting
+- Company career pages (Greenhouse, Lever, Ashby)
+- Most standard job boards
 
 ## Technical Details
 
+### Multi-Factor Matching Engine
+
+The application uses a sophisticated matching system that evaluates multiple dimensions:
+
+**1. Skills Matching (40% weight)**
+- Fuzzy matching with synonym detection
+- Technical skills prioritization
+- Comprehensive skill dictionary (500+ skills)
+- Partial match scoring
+
+**2. Experience Matching (30% weight)**
+- Years of experience comparison
+- Seniority level alignment
+- Career progression analysis
+
+**3. Education Matching (15% weight)**
+- Degree level comparison
+- Field of study relevance
+- Certification recognition
+
+**4. Responsibility Matching (15% weight)**
+- Job duty alignment
+- Role scope comparison
+- Leadership indicators
+
 ### Skill Detection
 
-The application uses a comprehensive skill dictionary including:
-- **Programming Languages**: Python, JavaScript, TypeScript, Java, C++, C#, Go, Rust
-- **Frontend Frameworks**: React, Angular, Vue, HTML, CSS
-- **Backend Technologies**: Node.js, Express, Django, Flask, Spring
-- **Databases**: SQL, MongoDB, PostgreSQL, MySQL, Redis
-- **Cloud Platforms**: AWS, Azure, GCP, Docker, Kubernetes
-- **Tools**: Git, CI/CD, Jenkins, Airflow, Tableau
+Comprehensive skill dictionary including:
+- **Programming Languages**: Python, JavaScript, TypeScript, Java, C++, C#, Go, Rust, Ruby, PHP, Swift, Kotlin
+- **Frontend**: React, Angular, Vue, Svelte, Next.js, HTML, CSS, Tailwind
+- **Backend**: Node.js, Express, Django, Flask, Spring Boot, FastAPI, .NET
+- **Databases**: SQL, MongoDB, PostgreSQL, MySQL, Redis, Cassandra, DynamoDB
+- **Cloud**: AWS, Azure, GCP, Docker, Kubernetes, Terraform
+- **Tools**: Git, CI/CD, Jenkins, GitHub Actions, Jira, Agile, Scrum
+- **Data Science**: Machine Learning, TensorFlow, PyTorch, Pandas, NumPy
 
 ### AI Suggestions
 
-The application uses OpenAI's GPT-4 model to generate personalized suggestions focusing on:
+The application uses Groq's Llama 3.3 70B Versatile model to generate personalized suggestions:
 - Adding missing skills or keywords
 - Highlighting relevant experience
 - Improving resume structure
 - Quantifying achievements
 - Tailoring content to job requirements
+- Ultra-fast response times with high-quality output
 
 ## Troubleshooting
 
@@ -234,8 +284,9 @@ The application uses OpenAI's GPT-4 model to generate personalized suggestions f
 **Backend won't start**:
 - Check that all environment variables are set in `.env`
 - Verify MongoDB connection string is correct
-- Ensure OpenAI API key is valid
+- Ensure Groq API key is valid (starts with `gsk_`)
 - Check if port 9000 is already in use
+- Run `npm install` to ensure all dependencies are installed
 
 **Frontend can't connect to backend**:
 - Verify backend is running on port 9000
@@ -249,8 +300,10 @@ The application uses OpenAI's GPT-4 model to generate personalized suggestions f
 
 **Job scraping fails**:
 - Verify the job URL is accessible
-- Some sites may block automated requests
-- Try different job posting URLs
+- Some sites may block automated requests or require authentication
+- Check browser console for specific error messages
+- Try different job posting URLs from supported platforms
+- Ensure Puppeteer dependencies are installed correctly
 
 ### Port Conflicts
 
@@ -273,28 +326,114 @@ VITE_API_URL=http://localhost:8000
 
 ## Development
 
+### Testing
+
+The project includes comprehensive test coverage:
+
+**Property-Based Testing**:
+- Uses `fast-check` library for property-based testing
+- Validates correctness properties across input ranges
+- Tests in `backend/services/matching/__tests__/`
+- Frontend component property tests
+
+**Unit Tests**:
+- Jest for backend testing
+- Vitest for frontend testing
+- Component tests with React Testing Library
+
+**Integration Tests**:
+- End-to-end flow validation
+- API endpoint testing
+- Error handling verification
+
+Run tests:
+```bash
+# Backend tests
+cd backend
+npm test
+
+# Frontend tests
+cd frontend
+npm test
+
+# Watch mode for development
+npm run test:watch
+```
+
+### Recent Improvements
+
+**Multi-Factor Matching Engine**:
+- Replaced simple skill matching with comprehensive multi-factor analysis
+- Weighted scoring across skills, experience, education, and responsibilities
+- Improved accuracy and relevance of match scores
+
+**Enhanced Job Scraping**:
+- Platform-specific parsers for major ATS systems
+- Content quality scoring and validation
+- Better handling of JavaScript-heavy pages
+- Fallback mechanisms for reliability
+
+**AI Service Migration**:
+- Migrated from OpenAI to Groq with Llama 3.3 70B Versatile
+- Ultra-fast response times (significantly faster than GPT models)
+- More cost-effective with generous free tier
+- High-quality, focused suggestions
+
+**Error Handling & UX**:
+- Comprehensive error boundaries
+- Graceful degradation for partial failures
+- Loading states and user feedback
+- Input validation and sanitization
+
 ### Project Structure
 
 ```
 job-match-analyzer/
 ├── backend/
-│   ├── config/          # Database configuration
-│   ├── controllers/     # Request handlers
-│   ├── models/          # MongoDB schemas
-│   ├── routes/          # API routes
-│   ├── services/        # Business logic
-│   ├── .env.example     # Environment template
-│   ├── package.json     # Dependencies
-│   └── server.js        # Main server file
+│   ├── config/              # Database configuration
+│   ├── controllers/         # Request handlers
+│   ├── middleware/          # Validation middleware
+│   ├── models/              # MongoDB schemas
+│   ├── routes/              # API routes
+│   ├── services/
+│   │   ├── matching/        # Multi-factor matching engine
+│   │   │   ├── skillMatcher.js
+│   │   │   ├── experienceMatcher.js
+│   │   │   ├── educationMatcher.js
+│   │   │   ├── responsibilityMatcher.js
+│   │   │   ├── finalScoreCalculator.js
+│   │   │   └── __tests__/   # Property-based tests
+│   │   ├── scraper/         # Job scraping engine
+│   │   │   ├── platformParsers/  # ATS-specific parsers
+│   │   │   ├── genericParser.js
+│   │   │   ├── contentScorer.js
+│   │   │   └── renderPage.js
+│   │   ├── aiSuggestions.js # Groq (Llama 3.3 70B) integration
+│   │   ├── resumeParser.js  # PDF parsing
+│   │   └── skillExtractor.js
+│   ├── .env.example         # Environment template
+│   ├── package.json         # Dependencies
+│   └── server.js            # Main server file
 ├── frontend/
 │   ├── src/
-│   │   ├── components/  # React components
-│   │   ├── services/    # API client
-│   │   └── App.jsx      # Main app component
-│   ├── .env.example     # Environment template
-│   ├── package.json     # Dependencies
-│   └── vite.config.js   # Vite configuration
-└── README.md            # This file
+│   │   ├── components/      # React components
+│   │   │   ├── ErrorBoundary.jsx
+│   │   │   ├── GracefulDegradation.jsx
+│   │   │   ├── JobInput.jsx
+│   │   │   ├── ResumeUpload.jsx
+│   │   │   ├── Results.jsx
+│   │   │   └── __tests__/   # Component tests
+│   │   ├── contexts/        # React contexts
+│   │   ├── hooks/           # Custom hooks
+│   │   ├── services/        # API client
+│   │   └── App.jsx          # Main app component
+│   ├── .env.example         # Environment template
+│   ├── package.json         # Dependencies
+│   ├── vite.config.js       # Vite configuration
+│   └── vitest.config.js     # Test configuration
+├── .kiro/
+│   └── specs/               # Feature specifications
+└── README.md                # This file
 ```
 
 ### Available Scripts
@@ -302,20 +441,33 @@ job-match-analyzer/
 **Backend**:
 - `npm run dev`: Start development server with nodemon
 - `npm start`: Start production server
-- `npm test`: Run tests (not implemented)
+- `npm test`: Run Jest tests
+- `npm run test:watch`: Run tests in watch mode
 
 **Frontend**:
 - `npm run dev`: Start Vite development server
 - `npm run build`: Build for production
 - `npm run preview`: Preview production build
+- `npm test`: Run Vitest tests
+- `npm run test:watch`: Run tests in watch mode
 
 ## Contributing
 
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+4. Add tests for new functionality
+5. Ensure all tests pass
+6. Submit a pull request
+
+## Additional Documentation
+
+- `QUICK_START_GUIDE.md` - Quick setup and testing guide
+- `SETUP_GOOGLE_AI.md` - Legacy Google AI setup (now using Groq)
+- `INTEGRATION_TEST_REPORT.md` - Integration test results
+- `backend/services/scraper/ARCHITECTURE.md` - Scraper architecture details
+- `backend/services/scraper/README.md` - Scraper usage guide
+- `.kiro/specs/` - Feature specifications and implementation plans
 
 ## License
 
